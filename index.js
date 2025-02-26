@@ -182,7 +182,8 @@ app.post('/chats/:chatId/messages', authenticate, async (req, res) => {
     // Setup streaming response
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('X-Accel-Buffering', 'no');
+    res.setHeader('Connection', 'keep-alive');
+
     res.write(':\n\n'); 
 
     // Handle client disconnect
@@ -215,7 +216,6 @@ app.post('/chats/:chatId/messages', authenticate, async (req, res) => {
     }
 
     // Finalize
-    res.write(`event: end\ndata: {}\n\n`);
     chat.messages.push(aiMessage._id);
     await chat.save();
 
