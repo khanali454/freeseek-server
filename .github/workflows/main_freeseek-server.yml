@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     permissions:
       contents: read #This is required for actions/checkout
 
@@ -27,13 +27,16 @@ jobs:
         run: |
           npm install
           npm run build --if-present
-         
-      
+          npm run test --if-present
+
+      - name: Zip artifact for deployment
+        run: zip release.zip ./* -r
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: .
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -50,17 +53,20 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: node-app
+
+      - name: Unzip artifact for deployment
+        run: unzip release.zip
       
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_A534159A153947EEB129392A4E95641A }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_3D5EABB7703247A2AD80BE262A51A2B0 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B36279A2E2EE4540B36745AED6BBA114 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_F570237F9B09467DB75FAC5665383840 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_4BE1D80C6F514CF6A3549AB99C389428 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_0E1F3BC1881042CF979C7DA6C8AC8A0E }}
 
       - name: 'Deploy to Azure Web App'
-        uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
         with:
           app-name: 'freeseek-server'
           slot-name: 'Production'
