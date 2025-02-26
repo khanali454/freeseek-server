@@ -117,9 +117,7 @@ app.post('/chats/stream', authenticate, upload.single('image'), async (req, res)
       res.write(`data: ${JSON.stringify({ content, chatId: newChat._id })}\n\n`);
     }
 
-    // Final message
-    res.write(`event: end\ndata: ${JSON.stringify({ done: true })}\n\n`);
-
+   
     // Save AI message
     const aiMessage = new Message({
       chat: newChat._id,
