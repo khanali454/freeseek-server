@@ -33,6 +33,10 @@ const authenticate = async (req, res, next) => {
 };
 
 // Routes
+
+app.get('/',(req,res)=>{
+  res.send("yes working");
+})
 app.post('/signup', async (req, res) => {
   try {
     const { username, email, password } = req.body;
