@@ -114,7 +114,7 @@ app.post('/chats/stream', authenticate, upload.single('image'), async (req, res)
     for await (const chunk of stream) {
       const content = chunk.choices[0]?.delta?.content || '';
       fullResponse += content;
-      res.write(`data: ${JSON.stringify({ content, chatId: newChat._id })}\n\n`);
+      res.write(`data: ${JSON.stringify({ content, chatId: newChat._id })} \n\n`);
     }
 
    
@@ -210,7 +210,7 @@ app.post('/chats/:chatId/messages', authenticate, async (req, res) => {
       aiMessage.content = fullResponse;
       await aiMessage.save();
       
-      res.write(`data: ${JSON.stringify({ content })}\n\n`);
+      res.write(`data: ${JSON.stringify({ content })} \n\n`);
     }
 
     // Finalize
