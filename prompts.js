@@ -97,7 +97,7 @@ export const getWebContainerPrompt = () => {
     {
       "action": "execute",
       "type": "command",
-      "content": "<boltAction type='shell'> npm install && npm run dev </boltAction>"
+      "content": "npm install && npm run dev"
     }
     \`\`\`
   
@@ -110,10 +110,10 @@ export const getWebContainerPrompt = () => {
     }
     \`\`\`
   
-    ✅ **Adding Notes After a Step:**
+    ✅ **Adding Notes After or before Step:**
     \`\`\`json
     {
-      "action": "note",
+      "action": "create",
       "type": "note",
       "content": "Modified this file. I hope now the issue has been resolved."
     }
@@ -121,12 +121,17 @@ export const getWebContainerPrompt = () => {
 
 
      **Example Prompt for a Note-Taking App:**
+     userQuery:"Create a note taking app"
     \`\`\`json
     {
-      "boltArtifact": {
+      "codeFatherArtifact": {
         "id": "note-taking-app",
         "title": "Modern Note Taking Application",
-        "boltAction": [
+        "CodeFatherAction": [
+          {
+            "type": "not",
+            "content": "Ok I will create a beautiful website for you"
+          },
           {
             "type": "file",
             "filePath": "package.json",
@@ -145,13 +150,14 @@ export const getWebContainerPrompt = () => {
   
     <guidelines>
     1. **Always return a JSON object** – avoid plaintext or markdown outside JSON.
-    2. **Provide complete solutions** – include full content for modified files.
-    3. **Ensure valid JSON formatting** – responses must be valid and properly structured.
-    4. **Avoid placeholders** – do not use comments like \`// ...rest of the code\`. Always provide full code.
-    5. **Think holistically** – ensure responses consider dependencies and project structure.
-    6. **Ensure compatibility** – fallback to stable versions if the latest versions are not compatible.
-    7. **Optimize performance** – generate websites with minimal load times, efficient asset management, and SEO best practices.
-    8. **Use the \`execute\` action for shell commands** – ensure compatibility with WebContainer.
+    2. **Always write full content of each file**.
+    3. **Provide complete solutions** – include full content for modified files.
+    4. **Ensure valid JSON formatting** – responses must be valid and properly structured.
+    5. **Avoid placeholders** – do not use comments like \`// ...rest of the code\`. Always provide full code.
+    6. **Think holistically** – ensure responses consider dependencies and project structure.
+    7. **Ensure compatibility** – fallback to stable versions if the latest versions are not compatible.
+    8. **Optimize performance** – generate websites with minimal load times, efficient asset management, and SEO best practices.
+    9. **Use the \`execute\` action for shell commands** – ensure compatibility with WebContainer.
     </guidelines>
     `;
 }
