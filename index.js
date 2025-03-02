@@ -7,7 +7,6 @@ import bcrypt from 'bcryptjs';
 import multer from 'multer';
 import { createStreamingCompletion } from './service/deepseek.js';
 import { User, Chat, Message } from './models.js';
-import { basePrompt, getWebContainerPrompt, templates } from './prompts.js';
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -35,7 +34,7 @@ const authenticate = async (req, res, next) => {
 
 // Routes
 
-app.get('/', (req, res) => {
+app.get('/',(req,res)=>{
   res.send("yes working");
 })
 app.post('/signup', async (req, res) => {
@@ -54,7 +53,7 @@ app.post('/login', async (req, res) => {
   try {
     const { username, password } = req.body;
     const user = await User.findOne({ email: username });
-
+    
     if (!user || !(await bcrypt.compare(password, user.password))) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -96,7 +95,7 @@ app.post('/chats/stream', authenticate, upload.single('image'), async (req, res)
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
-
+    
     // Immediate flush to establish connection
     res.write(':\n\n');
 
@@ -105,20 +104,11 @@ app.post('/chats/stream', authenticate, upload.single('image'), async (req, res)
       stream.controller?.abort();
     });
 
-
-    let messages_data = [
-      {
-        role: "system",
-        content: getWebContainerPrompt()
-      },
-      {
-        role:"user",
-        content:`${basePrompt} \n\n Project Files:\n\nThe following is a list of all project files and their complete contents that are currently visible and accessible to you.\n\n${JSON.stringify(templates[0].files)} \n\n ${req.body.content}`
-      }
-    ];
-
     // Get AI response
-    const stream = await createStreamingCompletion(messages_data);
+    const stream = await createStreamingCompletion([{
+      role: 'user',
+      content: req.body.content
+    }]);
 
     let fullResponse = '';
     for await (const chunk of stream) {
@@ -127,7 +117,7 @@ app.post('/chats/stream', authenticate, upload.single('image'), async (req, res)
       res.write(`data: ${JSON.stringify({ content, chatId: newChat._id })} \n\n`);
     }
 
-
+   
     // Save AI message
     const aiMessage = new Message({
       chat: newChat._id,
@@ -192,7 +182,7 @@ app.post('/chats/:chatId/messages', authenticate, async (req, res) => {
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    res.write(':\n\n');
+    res.write(':\n\n'); 
 
     // Handle client disconnect
     req.on('close', () => {
@@ -208,21 +198,18 @@ app.post('/chats/:chatId/messages', authenticate, async (req, res) => {
     });
     await aiMessage.save();
 
-
-
-
     // Start streaming
     stream = await createStreamingCompletion(context);
     let fullResponse = '';
-
+    
     for await (const chunk of stream) {
       const content = chunk.choices[0]?.delta?.content || '';
       fullResponse += content;
-
+      
       // Update incrementally
       aiMessage.content = fullResponse;
       await aiMessage.save();
-
+      
       res.write(`data: ${JSON.stringify({ content })} \n\n`);
     }
 
@@ -256,7 +243,7 @@ app.get('/chats', authenticate, async (req, res) => {
 
 // Initialize server
 connectDB().then(() => {
-  app.listen(process.env.PORT, () =>
+  app.listen(process.env.PORT, () => 
     console.log(`Server running on port ${process.env.PORT}`)
   );
 });
